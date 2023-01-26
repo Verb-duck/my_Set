@@ -10,6 +10,7 @@ public:
 	~my_set();
 	void clear();
 	bool insert(const T& date);
+	bool erase(const T& date);
 	size_t size() const;
 	
 private:
@@ -38,26 +39,26 @@ my_set<T>::my_set()
 template<class T>
 my_set<T>::~my_set()
 {
+	this->clear();
 }
 
 template<class T>
 void my_set<T>::clear()
 {	
-	//if(cell_head->cell_right != NULL)
-		Cell<T>* go_right = cell_head ->cell_right;
-	//if(cell_head->cell_left != NULL)
-		Cell<T>* go_left = cell_head->cell_left;
+	Cell<T>* go_right = cell_head ->cell_right;		
+	Cell<T>* go_left = cell_head->cell_left;
 	if (cell_head != NULL)
 	{
 		delete cell_head;
+		cell_head = nullptr;
 		lenght--;
 	}
-	if (go_left != NULL)
+	if (go_left != NULL)			//смещаемся влево и чистим
 	{
 		cell_head = go_left;
 		this->clear();
 	}
-	if (go_right != NULL)
+	if (go_right != NULL)			//смещаемся вправо и чистим
 	{
 		cell_head = go_right;
 		this->clear();
@@ -115,6 +116,64 @@ bool my_set<T>::insert(const T& date)
 	}
 }
 
+template<class T>
+bool my_set<T>::erase(const T& date)
+{
+	if (lenght == 1)
+	{
+		delete cell_head;
+		cell_head = nullptr;
+		lenght--;
+		return true;
+	}
+	if (lenght == 0)
+		return false;
+
+	Cell<T>* previos_cell = nullptr;
+	Cell<T>* now_cell = cell_head;
+	bool flag_turn;
+	while (now_cell->date != date)						 //ищем нужную ячейку
+	{	
+		previos_cell = now_cell;
+		if (date > now_cell->date)						 //идём вправо
+		{
+			now_cell = now_cell->cell_right;
+			flag_turn = true;							 //запоминаем куда повернули последний раз
+		}
+		else											 //идём влево 
+		{
+			now_cell = now_cell->cell_left;
+			flag_turn = false;							 //запоминаем куда повернули последний раз
+		}
+	}
+	if (flag_turn)										 //если повернули направо
+	{
+		previos_cell->cell_right = now_cell->cell_right; //вписываем правый хвост
+		Cell<T>* cell_temp = now_cell->cell_right;
+		while (cell_temp->cell_left != NULL)			 //ищем свободную ячейку в правом хвосте в левой ячейке
+		{												 //тк левый хвост по умолчанию самый малый 
+			cell_temp = cell_temp->cell_left;			 
+		}
+		cell_temp->cell_left = now_cell->cell_left; 
+		delete now_cell;
+		lenght--;
+		return true;
+	}
+	else												 //если повернули налево
+	{
+		previos_cell->cell_left = now_cell->cell_right; //вписываем правый хвост
+		Cell<T>* cell_temp = now_cell->cell_right;
+		while (cell_temp->cell_left != NULL)			 //ищем свободную ячейку в правом хвосте в левой ячейке
+		{												 //тк левый хвост по умолчанию самый малый 
+			cell_temp = cell_temp->cell_left;
+		}
+		cell_temp->cell_left = now_cell->cell_left;
+		delete now_cell;
+		lenght--;
+	  return true;
+	}
+}
+
 
 template<class T>
 size_t my_set<T>::size() const
@@ -132,5 +191,8 @@ int main()
 	set.insert(1);
 	set.insert(3);
 	set.insert(8);
+	std::cout << set.size() << std::endl;
+	set.erase(2);
+	std::cout<< set.size();
 }
 
