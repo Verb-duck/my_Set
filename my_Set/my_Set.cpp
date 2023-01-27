@@ -115,12 +115,16 @@ bool my_set<T>::erase(const T& date)
 		previos_cell = now_cell;
 		if (date > now_cell->date)						 //идём вправо
 		{
+			if (now_cell->cell_right == NULL)			 //если кончилась цепочка, такого
+				return false;							 //элемента нет
 			now_cell = now_cell->cell_right;
 			flag_turn_right = true;						 //запоминаем куда повернули последний раз
 		}
 		else											 //идём влево 
 		{
-			now_cell = now_cell->cell_left;
+			if (now_cell->cell_left == NULL)			 //если кончилась цепочка, такого
+				return false;							 //элемента нет
+			now_cell = now_cell->cell_left;			
 			flag_turn_right = false;					 //запоминаем куда повернули последний раз
 		}
 	}
@@ -220,7 +224,10 @@ int main()
 	set.insert(1);
 	set.insert(3);
 	set.insert(8);	
-	set.erase(2);
+	if (set.erase(9))
+		std::cout << "its ok" << std::endl;
+	else
+		std::cout << " dont ok" << std::endl;
 	set.print();
 }
 
